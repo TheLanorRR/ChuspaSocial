@@ -108,4 +108,17 @@ class listing_service {
 
         return $currency . ' ' . format_float($price, 2);
     }
+
+    public static function can_manage(listing $listing, int $userid): bool {
+        $isauthor = (int) $listing->get('userid') === $userid;
+
+        $ismoderator = false;
+        if (get_capability_info('local/chuspasocial:moderate')) {
+            $context = \context_system::instance();
+            $ismoderator = has_capability('local/chuspasocial:moderate', $context, $userid);
+        }
+
+        return $isauthor || $ismoderator;
+    }
+    
 }
