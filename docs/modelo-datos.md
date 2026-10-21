@@ -130,61 +130,101 @@ Almacena los anuncios de libros publicados por los usuarios.
 
 ## Diagrama de Tablas de la base de datos (Mermaid)
 
+```mermaid
 erDiagram
-    USER ||--o{ POST : publica
-    COURSE ||--o{ POST : contiene
-    POST ||--o{ COMMENT : tiene
-    USER ||--o{ COMMENT : comenta
-    POST ||--o{ REACTION : recibe
-    USER ||--o{ REACTION : reacciona
-    USER ||--o{ FOLLOWER : sigue
-    USER ||--o| PROFILE : tiene
-    USER ||--o{ NOTIFICATION : recibe
-    USER ||--o{ SETTINGS : configura
+    user {
+        int id PK
+    }
 
-    USER {
-        int id
-        string username
+    course {
+        int id PK
     }
-    COURSE {
-        int id
-        string fullname
+
+    local_chuspasocial_post {
+        int id PK
+        int userid FK "Autor de la publicacion"
+        int courseid FK "Curso asociado, 0 es muro general"
+        string type "Tipo de publicacion"
+        text content "Contenido"
+        int contentformat "Formato del contenido"
+        int hidden "Publicacion oculta"
+        int timecreated "Creacion"
+        int timemodified "Modificacion"
     }
-    POST {
-        int id
-        int userid
-        int courseid
-        string content
+
+    local_chuspasocial_comment {
+        int id PK
+        int postid FK "Publicacion comentada"
+        int userid FK "Autor del comentario"
+        text content "Contenido"
+        int contentformat "Formato del contenido"
+        int timecreated "Creacion"
+        int timemodified "Modificacion"
     }
-    COMMENT {
-        int id
-        int postid
-        int userid
-        string content
+
+    local_chuspasocial_reaction {
+        int id PK
+        int postid FK "Publicacion reaccionada"
+        int userid FK "Usuario que reacciona"
+        string type "Tipo de reaccion, like por defecto"
+        int timecreated "Creacion"
     }
-    REACTION {
-        int id
-        int postid
-        int userid
-        string type
+
+    local_chuspasocial_follow {
+        int id PK
+        int userid FK "Usuario que sigue"
+        string itemtype "user o tag"
+        int itemid "Id del usuario o etiqueta seguida"
+        int timecreated "Creacion"
     }
-    FOLLOWER {
-        int id
-        int userid
-        int followerid
+
+    local_chuspasocial_listing {
+        int id PK
+        int userid FK "Vendedor"
+        string title "Titulo del libro"
+        string author "Autor del libro"
+        text description "Descripcion"
+        int descriptionformat "Formato de la descripcion"
+        decimal price "Precio"
+        string externalcontact "Contacto externo"
+        string status "available o sold"
+        int timecreated "Creacion"
+        int timemodified "Modificacion"
     }
-    PROFILE {
-        int id
-        int userid
-        string bio
+
+    local_chuspasocial_lstcourse {
+        int id PK
+        int listingid FK "Anuncio de libro"
+        int courseid FK "Materia"
     }
-    NOTIFICATION {
-        int id
-        int userid
-        string type
+
+    local_chuspasocial_report {
+        int id PK
+        string itemtype "Tipo de contenido reportado"
+        int itemid "Id del contenido reportado"
+        int reporterid FK "Usuario que reporta"
+        text reason "Motivo"
+        string status "Estado, open por defecto"
+        int resolvedby FK "Moderador que resuelve"
+        int timecreated "Creacion"
+        int timeresolved "Resolucion"
     }
-    SETTINGS {
-        int id
-        int userid
-        string name
-    }
+
+    user ||--o{ local_chuspasocial_post : "publica"
+    course |o--o{ local_chuspasocial_post : "contiene"
+
+    local_chuspasocial_post ||--o{ local_chuspasocial_comment : "tiene"
+    user ||--o{ local_chuspasocial_comment : "comenta"
+
+    local_chuspasocial_post ||--o{ local_chuspasocial_reaction : "recibe"
+    user ||--o{ local_chuspasocial_reaction : "reacciona"
+
+    user ||--o{ local_chuspasocial_follow : "sigue"
+
+    user ||--o{ local_chuspasocial_listing : "vende"
+    local_chuspasocial_listing ||--o{ local_chuspasocial_lstcourse : "se vincula"
+    course ||--o{ local_chuspasocial_lstcourse : "tiene libros"
+
+    user ||--o{ local_chuspasocial_report : "reporta"
+    user |o--o{ local_chuspasocial_report : "resuelve"
+```
